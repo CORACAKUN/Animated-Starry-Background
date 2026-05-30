@@ -1,17 +1,29 @@
 const starField = document.getElementById("stars");
+const starCamera = document.createElement("div");
 const starWorld = document.createElement("div");
 const starColors = ["#dfe9ff", "#ffffff", "#ffe7b8", "#b8d8ff", "#ffd4f0"];
 // Adjust this value to increase or decrease the size of the star world (higher is larger || lower is smaller)
 const worldScale = 2.8;
 // Adjust this value to speed up or slow down the camera movement (higher is faster || lower is slower)
 const CAMERA_SPEED = 1.65;
+// Adjust this value to zoom the entire scene in or out like browser page zoom
+const SCENE_ZOOM = 0.50;
+const STAR_DENSITY_DIVISOR = 14000;
+const MIN_TINY_STARS = 450;
+const MAX_TINY_STARS = 1600;
+const MIN_BRIGHT_STARS = 18;
+const MAX_BRIGHT_STARS = 180;
+const RESIZE_DEBOUNCE_MS = 160;
 let viewportWidth = window.innerWidth;
 let viewportHeight = window.innerHeight;
-let worldWidth = viewportWidth * worldScale;
-let worldHeight = viewportHeight * worldScale;
+let worldWidth = (viewportWidth / SCENE_ZOOM) * worldScale;
+let worldHeight = (viewportHeight / SCENE_ZOOM) * worldScale;
+let resizeTimer;
 
+starCamera.className = "star-camera";
 starWorld.className = "star-world";
-starField.appendChild(starWorld);
+starCamera.appendChild(starWorld);
+starField.appendChild(starCamera);
 
 function randomBetween(min, max) {
     return Math.random() * (max - min) + min;
@@ -47,12 +59,18 @@ function createStar(type, maxX, maxY) {
 function generateStars() {
     viewportWidth = window.innerWidth;
     viewportHeight = window.innerHeight;
-    worldWidth = viewportWidth * worldScale;
-    worldHeight = viewportHeight * worldScale;
+    worldWidth = (viewportWidth / SCENE_ZOOM) * worldScale;
+    worldHeight = (viewportHeight / SCENE_ZOOM) * worldScale;
 
     const area = worldWidth * worldHeight;
-    const tinyCount = Math.max(700, Math.floor(area / 9000));
-    const brightCount = Math.max(20, Math.floor(tinyCount * 0.12));
+    const tinyCount = Math.min(
+        MAX_TINY_STARS,
+        Math.max(MIN_TINY_STARS, Math.floor(area / STAR_DENSITY_DIVISOR))
+    );
+    const brightCount = Math.min(
+        MAX_BRIGHT_STARS,
+        Math.max(MIN_BRIGHT_STARS, Math.floor(tinyCount * 0.12))
+    );
     const fragment = document.createDocumentFragment();
 
     starWorld.innerHTML = "";
@@ -72,31 +90,39 @@ function generateStars() {
 }
 
 function configureCamera() {
-    const maxOffsetX = Math.max(0, worldWidth - viewportWidth);
-    const maxOffsetY = Math.max(0, worldHeight - viewportHeight);
-    const marginX = maxOffsetX * 0.12;
-    const marginY = maxOffsetY * 0.12;
-    const startX = -marginX;
-    const startY = -marginY;
-    const midX = -(maxOffsetX * 0.42);
-    const midY = -(maxOffsetY * 0.22);
-    const endX = -(maxOffsetX - marginX);
-    const endY = -(maxOffsetY * 0.4);
+    const scaledWorldWidth = worldWidth * SCENE_ZOOM;
+    const scaledWorldHeight = worldHeight * SCENE_ZOOM;
+    const availableDriftX = Math.max(0, scaledWorldWidth - viewportWidth);
+    const availableDriftY = Math.max(0, scaledWorldHeight - viewportHeight);
+    const horizontalRange = availableDriftX * 0.32;
+    const verticalRange = availableDriftY * 0.22;
+    const startX = horizontalRange;
+    const startY = verticalRange * 0.45;
+    const midX = 0;
+    const midY = -verticalRange * 0.2;
+    const endX = -horizontalRange;
+    const endY = -verticalRange;
     const baseDuration = Math.max(180, Math.round(Math.max(viewportWidth, viewportHeight) / 5));
     const duration = (baseDuration / CAMERA_SPEED).toFixed(2);
 
-    starWorld.style.setProperty("--drift-start-x", `${startX}px`);
-    starWorld.style.setProperty("--drift-start-y", `${startY}px`);
-    starWorld.style.setProperty("--drift-mid-x", `${midX}px`);
-    starWorld.style.setProperty("--drift-mid-y", `${midY}px`);
-    starWorld.style.setProperty("--drift-end-x", `${endX}px`);
-    starWorld.style.setProperty("--drift-end-y", `${endY}px`);
-    starWorld.style.setProperty("--camera-duration", `${duration}s`);
-    starWorld.style.animation = "none";
-    void starWorld.offsetWidth;
-    starWorld.style.animation = "";
+    starCamera.style.setProperty("--drift-start-x", `${startX.toFixed(2)}px`);
+    starCamera.style.setProperty("--drift-start-y", `${startY.toFixed(2)}px`);
+    starCamera.style.setProperty("--drift-mid-x", `${midX.toFixed(2)}px`);
+    starCamera.style.setProperty("--drift-mid-y", `${midY.toFixed(2)}px`);
+    starCamera.style.setProperty("--drift-end-x", `${endX.toFixed(2)}px`);
+    starCamera.style.setProperty("--drift-end-y", `${endY.toFixed(2)}px`);
+    starCamera.style.setProperty("--camera-duration", `${duration}s`);
+    starWorld.style.setProperty("--scene-zoom", SCENE_ZOOM.toFixed(3));
+    starCamera.style.animation = "none";
+    void starCamera.offsetWidth;
+    starCamera.style.animation = "";
 }
 
-window.addEventListener("resize", generateStars);
+function handleResize() {
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(generateStars, RESIZE_DEBOUNCE_MS);
+}
+
+window.addEventListener("resize", handleResize);
 
 generateStars();

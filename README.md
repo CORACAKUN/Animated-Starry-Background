@@ -42,6 +42,7 @@ The main tuning values are in [`script.js`](./script.js):
 
 - `worldScale`: Controls how large the generated star world is compared to the viewport. Higher values create a larger field for the camera to drift across.
 - `CAMERA_SPEED`: Controls the speed of the drifting camera animation. Higher values make the movement faster.
+- `SCENE_ZOOM`: Controls the overall scale of the entire scene. Higher values make everything appear larger, similar to browser zooming in. Lower values make the scene appear smaller.
 
 You can also adjust:
 
@@ -64,5 +65,3 @@ You can also adjust:
 - The document title is currently set to `Portfolio` in `index.html` and can be renamed to match your project.
 
 ## License
-
-
