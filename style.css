@@ -1,0 +1,115 @@
+:root {
+    --space-black: #000000;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    overflow: hidden;
+    font-family: Georgia, "Times New Roman", serif;
+    background: var(--space-black);
+}
+
+.sky {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+    isolation: isolate;
+    background: transparent;
+}
+
+#stars {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.star-world {
+    position: absolute;
+    left: 0;
+    top: 0;
+    will-change: transform;
+    animation: cameraDrift var(--camera-duration, 90s) linear infinite alternate;
+}
+
+.star {
+    position: absolute;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    opacity: var(--opacity);
+    animation: twinkle var(--twinkle-duration) ease-in-out infinite;
+    animation-delay: var(--delay);
+}
+
+.star.tiny {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.35);
+}
+
+.star.bright {
+    background: radial-gradient(circle, #ffffff 0%, var(--glow-color) 50%, transparent 78%);
+    box-shadow:
+        0 0 8px rgba(255, 255, 255, 0.75),
+        0 0 18px color-mix(in srgb, var(--glow-color) 65%, transparent);
+}
+
+.star.bright::before,
+.star.bright::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.92), transparent);
+}
+
+.star.bright::before {
+    width: calc(var(--size) * 4);
+    height: 1px;
+}
+
+.star.bright::after {
+    width: 1px;
+    height: calc(var(--size) * 4);
+}
+
+@keyframes twinkle {
+    0%, 100% {
+        opacity: calc(var(--opacity) * 0.45);
+        transform: scale(0.85);
+        filter: hue-rotate(0deg);
+    }
+
+    35% {
+        opacity: var(--opacity);
+        transform: scale(1.2);
+        filter: hue-rotate(var(--hue-shift));
+    }
+
+    65% {
+        opacity: calc(var(--opacity) * 0.72);
+        transform: scale(0.95);
+        filter: hue-rotate(calc(var(--hue-shift) * -0.65));
+    }
+}
+
+@keyframes cameraDrift {
+    0% {
+        transform: translate3d(var(--drift-start-x), var(--drift-start-y), 0);
+    }
+
+    50% {
+        transform: translate3d(var(--drift-mid-x), var(--drift-mid-y), 0);
+    }
+
+    100% {
+        transform: translate3d(var(--drift-end-x), var(--drift-end-y), 0);
+    }
+}
