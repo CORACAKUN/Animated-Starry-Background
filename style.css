@@ -29,12 +29,19 @@ body {
     pointer-events: none;
 }
 
-.star-world {
+.star-camera {
     position: absolute;
-    left: 0;
-    top: 0;
+    inset: 0;
     will-change: transform;
     animation: cameraDrift var(--camera-duration, 90s) linear infinite alternate;
+}
+
+.star-world {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(var(--scene-zoom, 1));
+    transform-origin: center center;
 }
 
 .star {
@@ -102,14 +109,14 @@ body {
 
 @keyframes cameraDrift {
     0% {
-        transform: translate3d(var(--drift-start-x), var(--drift-start-y), 0);
+        transform: translate3d(var(--drift-start-x), var(--drift-start-y), 0) scale(var(--scene-zoom, 1));
     }
 
     50% {
-        transform: translate3d(var(--drift-mid-x), var(--drift-mid-y), 0);
+        transform: translate3d(var(--drift-mid-x), var(--drift-mid-y), 0) scale(var(--scene-zoom, 1));
     }
 
     100% {
-        transform: translate3d(var(--drift-end-x), var(--drift-end-y), 0);
+        transform: translate3d(var(--drift-end-x), var(--drift-end-y), 0) scale(var(--scene-zoom, 1));
     }
 }
