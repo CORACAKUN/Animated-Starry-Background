@@ -123,6 +123,15 @@ function handleResize() {
     resizeTimer = window.setTimeout(generateStars, RESIZE_DEBOUNCE_MS);
 }
 
+function updateAnimationState() {
+    const shouldPause = document.hidden || !document.hasFocus();
+    starCamera.style.animationPlayState = shouldPause ? "paused" : "running";
+}
+
 window.addEventListener("resize", handleResize);
+window.addEventListener("blur", updateAnimationState);
+window.addEventListener("focus", updateAnimationState);
+document.addEventListener("visibilitychange", updateAnimationState);
 
 generateStars();
+updateAnimationState();
